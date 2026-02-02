@@ -29,11 +29,18 @@ Este repositorio contiene el proyecto de la materia *4401 - IoT* de la Maestría
 
 2) Instalación por consola (CLI)
 
-Ejemplo con pip (requiere Python 3):
+**Opción A: Usar `pipx` (recomendado para Debian/Ubuntu)**
+
+En sistemas Debian/Ubuntu modernos (Python 3.11+), instale `pipx` primero:
 
 ```bash
-python3 -m pip install --upgrade pip
-python3 -m pip install -U platformio
+sudo apt install pipx
+```
+
+Luego instale PlatformIO:
+
+```bash
+pipx install platformio
 ```
 
 Compruebe la instalación:
@@ -42,7 +49,62 @@ Compruebe la instalación:
 pio --version
 ```
 
-Si usa un gestor de paquetes del sistema (por ejemplo `apt`, `brew`) o instaladores oficiales, consulte la documentación de PlatformIO.
+**Opción B: Virtual environment (alternativa)**
+
+Si prefiere un virtual environment local:
+
+```bash
+# Crear virtual environment
+python3 -m venv venv
+
+# Activar (Linux/macOS)
+source venv/bin/activate
+# O en Windows: venv\Scripts\activate
+
+# Instalar PlatformIO
+python3 -m pip install --upgrade pip
+python3 -m pip install -U platformio
+
+# Compruebe la instalación
+pio --version
+```
+
+Para usar PlatformIO en sesiones futuras, active el venv: `source venv/bin/activate`
+
+**Opción C: Con pip (si su sistema lo permite)**
+
+```bash
+python3 -m pip install -U platformio
+pio --version
+```
+
+Si recibe un error `externally-managed-environment`, use Opción A (pipx) o Opción B (venv).
+
+**Configurar puerto y velocidad de carga**
+
+El archivo `platformio.ini` contiene la configuración del puerto y velocidad de upload. Por defecto:
+
+```ini
+upload_port = /dev/ttyUSB0
+upload_speed = 115200
+```
+
+**Para cambiar el puerto:**
+
+- En Linux/macOS: Use `/dev/ttyUSBx` o `/dev/ttyACMx` (busque con `ls /dev/tty*`)
+- En Windows: Use `COMx` (por ejemplo, `COM3`)
+
+**Para cambiar la velocidad:**
+
+Modifique `upload_speed` en `platformio.ini`. Valores comunes: `9600`, `115200`, `921600`.
+
+**Autodetectar puerto en PlatformIO:**
+
+Puede establecer `upload_port` como `auto` para autodetección:
+
+```ini
+upload_port = auto
+```
 
 **Compilar y ejecutar el proyecto**
 
