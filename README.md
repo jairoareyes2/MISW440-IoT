@@ -1,6 +1,16 @@
 **Proyecto**
 
-Este repositorio contiene el proyecto de la materia *4401 - IoT* de la Maestría en Ingeniería de Software de la Universidad de los Andes.
+Este repositorio contiene el proyecto de la materia *4401 - IoT* de la Maestría en Ingeniería de Software de la Universidad de los Andes. El circuito a usar es el siguiente:
+
+![Circuito del proyecto](imgs/circuit.png)
+
+***Componentes***
+
+Los componentes usados son: 
+* Sensor de temperatura y humedad DHT11
+* Placa de desarrollo Nodemcu V1 (ESP 12-E)
+* Fotoresistencia GL5537
+* Resistencias de 10K ohms
 
 **Autores**
 
