@@ -19,7 +19,7 @@ const char pass[] = "";
 //Usuario uniandes sin @uniandes.edu.co
 #define HOSTNAME ""
 
-//Conexión a Mosquitto
+// Conexión a Mosquitto
 const char MQTT_HOST[] = "iotlab.virtual.uniandes.edu.co";
 const int MQTT_PORT = 8082;
 //Usuario uniandes sin @uniandes.edu.co
@@ -47,22 +47,27 @@ PubSubClient client(net);
 time_t now;
 unsigned long lastMillis = 0;
 
-//Función que conecta el node a través del protocolo MQTT
-//Emplea los datos de usuario y contraseña definidos en MQTT_USER y MQTT_PASS para la conexión
+// Función que conecta el node a través del protocolo MQTT
+// Emplea los datos de usuario y contraseña definidos en MQTT_USER y MQTT_PASS para la conexión
 void mqtt_connect()
 {
-  //Intenta realizar la conexión indefinidamente hasta que lo logre
-  while (!client.connected()) {
+  // Intenta realizar la conexión indefinidamente hasta que lo logre
+  while (!client.connected())
+  {
     Serial.print("Time: ");
     Serial.print(ctime(&now));
     Serial.print("MQTT connecting ... ");
-    if (client.connect(HOSTNAME, MQTT_USER, MQTT_PASS)) {
+    if (client.connect(HOSTNAME, MQTT_USER, MQTT_PASS))
+    {
       Serial.println("connected.");
-    } else {
+    }
+    else
+    {
       Serial.println("Problema con la conexión, revise los valores de las constantes MQTT");
       Serial.print("Código de error = ");
       Serial.println(client.state());
-      if ( client.state() == MQTT_CONNECT_UNAUTHORIZED ) {
+      if (client.state() == MQTT_CONNECT_UNAUTHORIZED)
+      {
         ESP.deepSleep(0);
       }
       /* Espera 5 segundos antes de volver a intentar */
@@ -71,16 +76,18 @@ void mqtt_connect()
   }
 }
 
-void receivedCallback(char* topic, byte* payload, unsigned int length) {
+void receivedCallback(char *topic, byte *payload, unsigned int length)
+{
   Serial.print("Received [");
   Serial.print(topic);
   Serial.print("]: ");
-  for (int i = 0; i < length; i++) {
+  for (int i = 0; i < length; i++)
+  {
     Serial.print((char)payload[i]);
   }
 }
 
-//Configura la conexión del node MCU a Wifi y a Mosquitto
+// Configura la conexión del node MCU a Wifi y a Mosquitto
 void setup()
 {
   Serial.begin(115200);
@@ -92,14 +99,17 @@ void setup()
   WiFi.hostname(HOSTNAME);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, pass);
-  //Intenta conectarse con los valores de las constantes ssid y pass a la red Wifi
-  //Si la conexión falla el node se dormirá hasta que lo resetee
+  // Intenta conectarse con los valores de las constantes ssid y pass a la red Wifi
+  // Si la conexión falla el node se dormirá hasta que lo resetee
   while (WiFi.status() != WL_CONNECTED)
   {
-    if ( WiFi.status() == WL_NO_SSID_AVAIL || WiFi.status() == WL_WRONG_PASSWORD ) {
+    if (WiFi.status() == WL_NO_SSID_AVAIL || WiFi.status() == WL_WRONG_PASSWORD)
+    {
       Serial.print("\nProblema con la conexión, revise los valores de las constantes ssid y pass");
       ESP.deepSleep(0);
-    } else if ( WiFi.status() == WL_CONNECT_FAILED ) {
+    }
+    else if (WiFi.status() == WL_CONNECT_FAILED)
+    {
       Serial.print("\nNo se ha logrado conectar con la red, resetee el node y vuelva a intentar");
       ESP.deepSleep(0);
     }
@@ -108,11 +118,12 @@ void setup()
   }
   Serial.println("connected!");
 
-  //Sincroniza la hora del dispositivo con el servidor SNTP (Simple Network Time Protocol)
+  // Sincroniza la hora del dispositivo con el servidor SNTP (Simple Network Time Protocol)
   Serial.print("Setting time using SNTP");
   configTime(-5 * 3600, 0, "pool.ntp.org", "time.nist.gov");
   now = time(nullptr);
-  while (now < 1510592825) {
+  while (now < 1510592825)
+  {
     delay(500);
     Serial.print(".");
     now = time(nullptr);
@@ -120,7 +131,7 @@ void setup()
   Serial.println("done!");
   struct tm timeinfo;
   gmtime_r(&now, &timeinfo);
-  //Una vez obtiene la hora, imprime en el monitor el tiempo actual
+  // Una vez obtiene la hora, imprime en el monitor el tiempo actual
   Serial.print("Current time: ");
   Serial.print(asctime(&timeinfo));
 
@@ -139,18 +150,18 @@ void setup()
     net.setInsecure();
   #endif
   net.setInsecure();
-  //Llama a funciones de la librería PubSubClient para configurar la conexión con Mosquitto
+  // Llama a funciones de la librería PubSubClient para configurar la conexión con Mosquitto
   client.setServer(MQTT_HOST, MQTT_PORT);
   client.setCallback(receivedCallback);
-  //Llama a la función de este programa que realiza la conexión con Mosquitto
+  // Llama a la función de este programa que realiza la conexión con Mosquitto
   mqtt_connect();
 }
 
-//Función loop que se ejecuta indefinidamente repitiendo el código a su interior
-//Cada vez que se ejecuta toma nuevos datos de la lectura del sensor
+// Función loop que se ejecuta indefinidamente repitiendo el código a su interior
+// Cada vez que se ejecuta toma nuevos datos de la lectura del sensor
 void loop()
 {
-  //Revisa que la conexión Wifi y MQTT siga activa
+  // Revisa que la conexión Wifi y MQTT siga activa
   if (WiFi.status() != WL_CONNECTED)
   {
     Serial.print("Checking wifi");
@@ -175,46 +186,64 @@ void loop()
   }
 
   now = time(nullptr);
-  //Lee los datos del sensor
+  // Lee los datos del sensor
   float h = dht.readHumidity();
   float t = dht.readTemperature();
-  //Transforma la información a la notación JSON para poder enviar los datos 
-  //El mensaje que se envía es de la forma {"value": x}, donde x es el valor de temperatura o humedad
+  // Transforma la información a la notación JSON para poder enviar los datos
+  // El mensaje que se envía es de la forma {"value": x}, donde x es el valor de temperatura o humedad
 
-  //Lee el valor de luminosidad (LDR) por A0
+  // Lee el valor de luminosidad (LDR) por A0
   int adc = analogRead(A0);
+  
+  // ADC -> voltaje
   float Vout = adc * 3.3 / 1023.0;
 
-  float Rfija = 10000.0;
-  float Rldr = Rfija * (3.3 / Vout - 1);
+  // Evitar división por cero
+  if (Vout <= 0.01)
+  {
+    Vout = 0.00001;
+  }
 
-  float lux = pow(50000.0 / Rldr, 1.0 / 0.7);
+  // Parámetros del divisor
+  const float Vcc = 3.3;
+  const float Rfija = 10000.0; // 10kΩ
+
+  // Voltaje -> resistencia LDR
+  float Rldr = Rfija * (Vcc / Vout - 1.0);
+
+  // Parámetros GL5516 (bin 5–10k @10 lux)
+  const float gamma = 0.5;
+  const float A = 25000.0; // ≈ R10 * 10^gamma
+
+  // Resistencia -> lux
+  float lux = pow(A / Rldr, 1.0 / gamma);
   
-  //JSON para humedad
-  String json = "{\"value\": "+ String(h) + "}";
-  char payload1[json.length()+1];
-  json.toCharArray(payload1,json.length()+1);
-  //JSON para temperatura
-  json = "{\"value\": "+ String(t) + "}";
-  char payload2[json.length()+1];
-  json.toCharArray(payload2,json.length()+1);
+  // JSON para humedad
+  String json = "{\"value\": " + String(h) + "}";
+  char payload1[json.length() + 1];
+  json.toCharArray(payload1, json.length() + 1);
+  // JSON para temperatura
+  json = "{\"value\": " + String(t) + "}";
+  char payload2[json.length() + 1];
+  json.toCharArray(payload2, json.length() + 1);
 
-  //JSON para luminosidad
-  String jsonL = "{\"value\": "+ String(lux) + "}";
-  char payload3[jsonL.length()+1];
-  jsonL.toCharArray(payload3, jsonL.length()+1);
+  // JSON para luminosidad
+  String jsonL = "{\"value\": " + String(lux) + "}";
+  char payload3[jsonL.length() + 1];
+  jsonL.toCharArray(payload3, jsonL.length() + 1);
 
-  //Si los valores recolectados no son indefinidos, se envían a los tópicos correspondientes
-  if ( !isnan(h) && !isnan(t) ) {
-    //Publica en el tópico de la humedad
+  // Si los valores recolectados no son indefinidos, se envían a los tópicos correspondientes
+  if (!isnan(h) && !isnan(t))
+  {
+    // Publica en el tópico de la humedad
     client.publish(MQTT_PUB_TOPIC1, payload1, false);
-    //Publica en el tópico de la temperatura
+    // Publica en el tópico de la temperatura
     client.publish(MQTT_PUB_TOPIC2, payload2, false);
-    //Publica en el tópico de la luminosidad
+    // Publica en el tópico de la luminosidad
     client.publish(MQTT_PUB_TOPIC3, payload3, false);
   }
 
-  //Imprime en el monitor serial la información recolectada
+  // Imprime en el monitor serial la información recolectada
   Serial.print(MQTT_PUB_TOPIC1);
   Serial.print(" -> ");
   Serial.println(payload1);
