@@ -182,7 +182,13 @@ void loop()
   //El mensaje que se envía es de la forma {"value": x}, donde x es el valor de temperatura o humedad
 
   //Lee el valor de luminosidad (LDR) por A0
-  int luz = analogRead(A0);
+  int adc = analogRead(A0);
+  float Vout = adc * 3.3 / 1023.0;
+
+  float Rfija = 10000.0;
+  float Rldr = Rfija * (3.3 / Vout - 1);
+
+  float lux = pow(50000.0 / Rldr, 1.0 / 0.7);
   
   //JSON para humedad
   String json = "{\"value\": "+ String(h) + "}";
@@ -194,7 +200,7 @@ void loop()
   json.toCharArray(payload2,json.length()+1);
 
   //JSON para luminosidad
-  String jsonL = "{\"value\": "+ String(luz) + "}";
+  String jsonL = "{\"value\": "+ String(lux) + "}";
   char payload3[jsonL.length()+1];
   jsonL.toCharArray(payload3, jsonL.length()+1);
 
