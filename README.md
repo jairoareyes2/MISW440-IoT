@@ -70,7 +70,7 @@ Consulte [codigo_nodemcu/README.md](codigo_nodemcu/README.md) para:
 La simulación incluye:
 - **1 Estación Base** (basestation_100)
 - **21 Nodos Sensores** (sensor_1 a sensor_21)
-- **134 Nodos de Gas** (gas_1 a gas_134)
+- **21 Nodos de Gas** (entre gas_1 y gas_134)
 - Configuración de radios y parámetros de simulación
 
 ## 📝 Archivos Importantes
@@ -88,7 +88,7 @@ La simulación incluye:
 ## 🔧 Requisitos Generales
 
 ### Para Simulación
-- CupCarbon instalado
+- CupCarbon 7.2 instalado
 - Java Runtime Environment (JRE)
 
 ### Para Firmware
