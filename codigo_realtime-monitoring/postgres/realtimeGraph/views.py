@@ -517,6 +517,61 @@ La respuesta tiene esta estructura:
 """
 
 
+"""
+Endpoint GET /api/stats-by-country/
+Devuelve estadísticas agregadas (min, max, avg, count) de Data por país y medición.
+Parámetros opcionales: from, to (timestamps en ms). Por defecto: última semana.
+JSON: { "period": { "start", "end" }, "data": [ { "country", "country_code", "measurements": [...] } ] }
+"""
+
+
+def get_stats_by_country(request):
+    start, end = get_daterange(request)
+    start_formatted = start.strftime("%d/%m/%Y") if start else " "
+    end_formatted = end.strftime("%d/%m/%Y") if end else " "
+
+    aggregated = Data.objects.filter(
+        time__gte=start,
+        time__lte=end,
+        station__location__country__isnull=False,
+    ).values(
+        "station__location__country__name",
+        "station__location__country__code",
+        "measurement__name",
+        "measurement__unit",
+    ).annotate(
+        min_val=Min("value"),
+        max_val=Max("value"),
+        avg_val=Avg("value"),
+        count_val=Count("value"),
+    )
+
+    countries_dict = {}
+    for row in aggregated:
+        country_name = row["station__location__country__name"]
+        country_code = row["station__location__country__code"] or ""
+        if country_name not in countries_dict:
+            countries_dict[country_name] = {
+                "country": country_name,
+                "country_code": country_code,
+                "measurements": [],
+            }
+        countries_dict[country_name]["measurements"].append({
+            "name": row["measurement__name"],
+            "unit": row["measurement__unit"],
+            "min": row["min_val"] if row["min_val"] is not None else 0,
+            "max": row["max_val"] if row["max_val"] is not None else 0,
+            "avg": round(row["avg_val"] if row["avg_val"] is not None else 0, 2),
+            "count": row["count_val"],
+        })
+
+    result = {
+        "period": {"start": start_formatted, "end": end_formatted},
+        "data": list(countries_dict.values()),
+    }
+    return JsonResponse(result)
+
+
 def get_map_json(request, **kwargs):
     data_result = {}
 
